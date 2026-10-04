@@ -30,7 +30,7 @@ export async function exportBackup(): Promise<string> {
   };
 
   const jsonStr = JSON.stringify(data, null, 2);
-  const fileName = `accountabilibuddy-backup-${new Date().toISOString().split('T')[0]}.json`;
+  const fileName = `accountabilibuddies-backup-${new Date().toISOString().split('T')[0]}.json`;
 
   const backupFile = new File(Paths.cache, fileName);
   if (backupFile.exists) {
@@ -42,7 +42,7 @@ export async function exportBackup(): Promise<string> {
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(backupFile.uri, {
       mimeType: 'application/json',
-      dialogTitle: 'Export Accountabilibuddy Data',
+      dialogTitle: 'Export Accountabilibuddies Data',
       UTI: 'public.json',
     });
   }

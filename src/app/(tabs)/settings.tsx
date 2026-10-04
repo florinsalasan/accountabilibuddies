@@ -198,7 +198,7 @@ export default function SettingsScreen() {
       <View style={styles.infoCard}>
         <Ionicons name="information-circle-outline" size={22} color={Colors.primary} />
         <Text style={styles.infoText}>
-          Accountabilibuddy keeps health numbers hidden during normal use. The goal is to build consistent lifelong habits, rather than stressing over metrics!
+          Accountabilibuddies keeps health numbers hidden during normal use. The goal is to build consistent lifelong habits, rather than stressing over metrics!
         </Text>
       </View>
     </ScrollView>

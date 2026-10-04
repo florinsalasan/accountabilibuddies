@@ -2,7 +2,7 @@ import * as SQLite from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import * as schema from './schema.ts';
 
-export const DB_NAME = 'accountabilibuddy.db';
+export const DB_NAME = 'accountabilibuddies.db';
 
 let _expoDb: SQLite.SQLiteDatabase | null = null;
 let _drizzleDb: ReturnType<typeof drizzle<typeof schema>> | null = null;

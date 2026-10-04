@@ -31,7 +31,7 @@ export async function setupNotificationChannels() {
   if (Platform.OS === 'android' && Notifications) {
     try {
       await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNEL_ID, {
-        name: 'Accountabilibuddy Reminders',
+        name: 'Accountabilibuddies Reminders',
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#3B82F6',

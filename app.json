@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Accountabilibuddy",
-    "slug": "accountabilibuddy",
-    "scheme": "accountabilibuddy",
+    "name": "Accountabilibuddies",
+    "slug": "accountabilibuddies",
+    "scheme": "accountabilibuddies",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.florinsalasan.accountabilibuddy"
+      "bundleIdentifier": "com.florinsalasan.accountabilibuddies"
     },
     "android": {
-      "package": "com.florinsalasan.accountabilibuddy",
+      "package": "com.florinsalasan.accountabilibuddies",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
