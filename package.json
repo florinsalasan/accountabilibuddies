@@ -40,7 +40,8 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "prestart": "npm run avatars",
+    "postinstall": "node scripts/patch-notifications.mjs",
+    "prestart": "node scripts/patch-notifications.mjs",
     "start": "expo start",
     "android": "npm run avatars && expo run:android",
     "ios": "npm run avatars && expo run:ios",

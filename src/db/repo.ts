@@ -479,6 +479,22 @@ export const GoalRepo = {
     });
   },
 
+  async setHealth(goalId: string, newHealth: number) {
+    const db = getDb();
+    const clamped = Math.max(0, Math.min(100, Math.round(newHealth)));
+    const now = Date.now();
+    await db
+      .update(schema.goals)
+      .set({
+        health: clamped,
+        lifeState: clamped === 0 ? 'lastChance' : 'active',
+        lastChanceStartedAt: clamped === 0 ? now : null,
+        lastChanceEndsAt: clamped === 0 ? now + 86400000 : null,
+        updatedAt: now,
+      })
+      .where(eq(schema.goals.id, goalId));
+  },
+
   async delete(goalId: string) {
     const db = getDb();
     await db.delete(schema.goals).where(eq(schema.goals.id, goalId));

@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AppState, type AppStateStatus } from 'react-native';
 import { initDatabase } from '../db/init.ts';
-import { setupNotificationChannels } from '../services/notifications.ts';
+import { setupNotificationChannels, requestNotificationPermissions } from '../services/notifications.ts';
 import { useGoalStore } from '../store/useGoalStore.ts';
 import { Colors } from '../constants/theme.ts';
 
@@ -12,8 +12,9 @@ export default function RootLayout() {
     // 1. Initialize SQLite schema
     initDatabase();
 
-    // 2. Configure push notification channels
+    // 2. Configure push notification channels & request permissions
     setupNotificationChannels();
+    requestNotificationPermissions();
 
     // 3. Load goals and initial store state
     useGoalStore.getState().init();

@@ -3,7 +3,8 @@ import * as Haptics from 'expo-haptics';
 import { GoalRepo, SettingsRepo } from '../db/repo.ts';
 import type * as schema from '../db/schema.ts';
 import type { Category, GoalType, Cadence, Rating, ProgressSource } from '../domain/types.ts';
-import { scheduleGoalReminder, cancelGoalReminders } from '../services/notifications.ts';
+import { scheduleGoalReminder, cancelGoalReminders, sendImmediateCheckInNotification } from '../services/notifications.ts';
+import { effectiveHealth, healthState } from '../domain/health.ts';
 
 interface GoalDetailState {
   goal: schema.GoalRecord;
@@ -57,6 +58,8 @@ interface GoalStore {
   deleteGoal: (goalId: string) => Promise<void>;
 
   setDevMode: (enabled: boolean) => Promise<void>;
+  setGoalHealth: (id: string, health: number) => Promise<void>;
+  triggerDevNotification: (goalId: string) => Promise<void>;
   timeTravel: (days: number) => Promise<void>;
   resetTimeTravel: () => Promise<void>;
 }
@@ -198,6 +201,25 @@ export const useGoalStore = create<GoalStore>((set, get) => ({
   setDevMode: async (enabled) => {
     await SettingsRepo.set('dev_mode', enabled ? 'true' : 'false');
     set({ devMode: enabled });
+  },
+
+  setGoalHealth: async (id, health) => {
+    await GoalRepo.setHealth(id, health);
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await get().loadGoals();
+    if (get().activeGoalDetail && get().activeGoalDetail!.goal.id === id) {
+      await get().loadGoalDetail(id);
+    }
+  },
+
+  triggerDevNotification: async (goalId) => {
+    const detail = await GoalRepo.getById(goalId);
+    if (!detail) return;
+    const { goal } = detail;
+    const now = Date.now() + get().simulatedTimeOffsetMs;
+    const currentHealth = effectiveHealth(goal as any, now);
+    const hState = healthState(currentHealth);
+    await sendImmediateCheckInNotification(goal.title, goal.category, hState, goal.id);
   },
 
   timeTravel: async (days) => {

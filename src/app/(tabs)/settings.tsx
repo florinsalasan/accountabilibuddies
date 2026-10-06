@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '../../store/useGoalStore.ts';
 import { SettingsRepo } from '../../db/repo.ts';
 import { exportBackup, importBackup } from '../../services/backup.ts';
+import { sendImmediateCheckInNotification } from '../../services/notifications.ts';
 import { Colors } from '../../constants/theme.ts';
 
 export default function SettingsScreen() {
@@ -189,6 +190,14 @@ export default function SettingsScreen() {
                   <Text style={styles.resetBtnText}>Reset to Real Time</Text>
                 </TouchableOpacity>
               )}
+
+              <TouchableOpacity
+                style={styles.devNotifBtn}
+                onPress={() => sendImmediateCheckInNotification('Daily Workout', 'fitness', 'good')}
+              >
+                <Ionicons name="notifications-outline" size={16} color="#0284C7" />
+                <Text style={styles.devNotifBtnText}>Test Check-in Notification</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -337,5 +346,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1E40AF',
     lineHeight: 18,
+  },
+  devNotifBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    gap: 8,
+    marginTop: 12,
+  },
+  devNotifBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0284C7',
   },
 });

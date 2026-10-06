@@ -39,6 +39,8 @@ export default function GoalDetailScreen() {
     abandonGoal,
     deleteGoal,
     devMode,
+    setGoalHealth,
+    triggerDevNotification,
   } = useGoalStore();
 
   const [selectedRating, setSelectedRating] = useState<Exclude<Rating, 'missed'>>('on_track');
@@ -196,12 +198,86 @@ export default function GoalDetailScreen() {
 
         {devMode && (
           <View style={styles.devCard}>
-            <Text style={styles.devText}>
-              🛠️ DEV SCORE: {Math.round(currentHealth)}/100 ({hState})
-            </Text>
+            <View style={styles.devHeaderRow}>
+              <Text style={styles.devText}>
+                🛠️ DEV SCORE: {Math.round(currentHealth)}/100 ({hState.toUpperCase()})
+              </Text>
+              <View style={styles.devStepperRow}>
+                <TouchableOpacity
+                  style={styles.devStepBtn}
+                  onPress={() => setGoalHealth(goal.id, goal.health - 10)}
+                >
+                  <Text style={styles.devStepBtnText}>-10</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.devStepBtn}
+                  onPress={() => setGoalHealth(goal.id, goal.health + 10)}
+                >
+                  <Text style={styles.devStepBtnText}>+10</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             <Text style={styles.devSubText}>
-              Base health: {Math.round(goal.health)} | Best streak: {goal.bestStreak} | No-progress streak: {goal.noProgressStreak}
+              Base: {Math.round(goal.health)} | Best streak: {goal.bestStreak} | No-progress: {goal.noProgressStreak}
             </Text>
+
+            {/* Quick State Presets */}
+            <View style={styles.devPresetRow}>
+              <TouchableOpacity
+                style={[styles.devPresetBtn, hState === 'thriving' && styles.devPresetBtnActive]}
+                onPress={() => setGoalHealth(goal.id, 95)}
+              >
+                <Text style={[styles.devPresetText, hState === 'thriving' && styles.devPresetTextActive]}>
+                  🌟 Thriving
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.devPresetBtn, hState === 'good' && styles.devPresetBtnActive]}
+                onPress={() => setGoalHealth(goal.id, 70)}
+              >
+                <Text style={[styles.devPresetText, hState === 'good' && styles.devPresetTextActive]}>
+                  🙂 Good
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.devPresetBtn, hState === 'meh' && styles.devPresetBtnActive]}
+                onPress={() => setGoalHealth(goal.id, 50)}
+              >
+                <Text style={[styles.devPresetText, hState === 'meh' && styles.devPresetTextActive]}>
+                  😐 Meh
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.devPresetBtn, hState === 'struggling' && styles.devPresetBtnActive]}
+                onPress={() => setGoalHealth(goal.id, 30)}
+              >
+                <Text style={[styles.devPresetText, hState === 'struggling' && styles.devPresetTextActive]}>
+                  😰 Struggling
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.devPresetBtn, hState === 'dying' && styles.devPresetBtnActive]}
+                onPress={() => setGoalHealth(goal.id, 10)}
+              >
+                <Text style={[styles.devPresetText, hState === 'dying' && styles.devPresetTextActive]}>
+                  💀 Dying
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Trigger Notification Button */}
+            <TouchableOpacity
+              style={styles.devNotifBtn}
+              onPress={() => triggerDevNotification(goal.id)}
+            >
+              <Ionicons name="notifications-outline" size={15} color="#0284C7" />
+              <Text style={styles.devNotifBtnText}>Trigger Check-in Notification</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -489,23 +565,93 @@ const styles = StyleSheet.create({
   },
   devCard: {
     marginTop: 12,
-    backgroundColor: '#F1F5F9',
-    padding: 8,
-    borderRadius: 8,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    borderRadius: 12,
+    width: '100%',
+  },
+  devHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
+  },
+  devStepperRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  devStepBtn: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  devStepBtnText: {
+    fontSize: 12,
+    fontFamily: 'monospace',
+    fontWeight: '700',
+    color: '#334155',
   },
   devText: {
     fontSize: 12,
     fontFamily: 'monospace',
     fontWeight: '700',
-    color: '#334155',
+    color: '#0F172A',
   },
   devSubText: {
     fontSize: 11,
     fontFamily: 'monospace',
     color: '#64748B',
     marginTop: 2,
+    marginBottom: 8,
+  },
+  devPresetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 10,
+    width: '100%',
+  },
+  devPresetBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  devPresetBtnActive: {
+    backgroundColor: '#E0F2FE',
+    borderColor: '#0284C7',
+  },
+  devPresetText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  devPresetTextActive: {
+    color: '#0369A1',
+    fontWeight: '700',
+  },
+  devNotifBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 6,
+    width: '100%',
+  },
+  devNotifBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0284C7',
   },
   section: {
     marginBottom: 20,
