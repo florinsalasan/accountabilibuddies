@@ -395,9 +395,14 @@ export default function CreateGoalScreen() {
             mode="date"
             display="default"
             minimumDate={new Date()}
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(Platform.OS === 'ios');
+            onValueChange={(_event, selectedDate) => {
+              if (Platform.OS !== 'ios') {
+                setShowDatePicker(false);
+              }
               if (selectedDate) setTargetDate(selectedDate);
+            }}
+            onDismiss={() => {
+              setShowDatePicker(false);
             }}
           />
         )}

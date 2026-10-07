@@ -15,7 +15,6 @@ export { NOTIFICATION_CHANNEL_ID, getEscalatingMessage, getLastChanceMessage };
 // Configure notification presentation when app is foregrounded
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldShowBanner: true,
     shouldShowList: true,
     shouldPlaySound: true,
@@ -35,8 +34,12 @@ export async function setupNotificationChannels() {
         enableVibrate: true,
         showBadge: true,
       });
-    } catch (e) {
-      console.warn('expo-notifications setNotificationChannelAsync failed:', e);
+    } catch (e: any) {
+      // In Expo Go on Android (SDK 53+), NotificationsChannelsProvider is null because Expo Go
+      // does not support custom notification channels natively. Development and standalone builds handle this properly.
+      if (!e?.message?.includes('NotificationsChannelsProvider')) {
+        console.warn('expo-notifications setNotificationChannelAsync failed:', e);
+      }
     }
   }
 }
