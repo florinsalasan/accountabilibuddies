@@ -11,19 +11,12 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '../../store/useGoalStore.ts';
 import { Avatar } from '../../components/avatar/Avatar.tsx';
+import { CategoryIcon } from '../../components/CategoryIcon.tsx';
 import { effectiveHealth, healthState, isCheckInOpen, isOverdue } from '../../domain/health.ts';
 import { CADENCE_LABEL } from '../../domain/periods.ts';
 import { Colors } from '../../constants/theme.ts';
 import type { GoalRecord } from '../../db/schema.ts';
 import { useCurrentTime } from '../../hooks/useCurrentTime.ts';
-
-const CATEGORY_ICONS: Record<string, string> = {
-  fitness: '🏋️',
-  finance: '💰',
-  learning: '📚',
-  creative: '🎨',
-  generic: '✨',
-};
 
 export default function HomeScreen() {
   const { goals, isLoading, loadGoals, devMode, simulatedTimeOffsetMs } = useGoalStore();
@@ -59,17 +52,21 @@ export default function HomeScreen() {
     const inLastChance = item.lifeState === 'lastChance';
 
     let statusBadgeColor = Colors.primary;
+    let statusIcon: keyof typeof Ionicons.glyphMap = 'time-outline';
     let statusText = `Due ${new Date(item.nextDueAt).toLocaleDateString(undefined, { weekday: 'short' })}`;
 
     if (inLastChance) {
       statusBadgeColor = Colors.danger;
-      statusText = '⚠️ LAST CHANCE';
+      statusIcon = 'warning';
+      statusText = 'LAST CHANCE';
     } else if (overdue) {
       statusBadgeColor = Colors.danger;
-      statusText = '🚨 Overdue!';
+      statusIcon = 'alert-circle';
+      statusText = 'Overdue';
     } else if (checkInOpen) {
       statusBadgeColor = Colors.success;
-      statusText = '✅ Check-in Open!';
+      statusIcon = 'checkmark-circle';
+      statusText = 'Check-in Ready';
     }
 
     return (
@@ -80,10 +77,11 @@ export default function HomeScreen() {
       >
         <View style={styles.cardHeader}>
           <View style={styles.categoryBadge}>
-            <Text style={styles.categoryIcon}>{CATEGORY_ICONS[item.category] || '✨'}</Text>
+            <CategoryIcon category={item.category} size={14} color={Colors.primary} />
             <Text style={styles.categoryText}>{item.category.toUpperCase()}</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: statusBadgeColor }]}>
+            <Ionicons name={statusIcon} size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
             <Text style={styles.statusText}>{statusText}</Text>
           </View>
         </View>
@@ -118,8 +116,9 @@ export default function HomeScreen() {
 
             {devMode && (
               <View style={styles.devBox}>
+                <Ionicons name="construct" size={13} color="#475569" style={{ marginRight: 4 }} />
                 <Text style={styles.devText}>
-                  🛠️ Health: {Math.round(currentHealth)}/100 ({hState})
+                  Health: {Math.round(currentHealth)}/100 ({hState})
                 </Text>
               </View>
             )}
@@ -133,8 +132,9 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {devMode && simulatedTimeOffsetMs !== 0 && (
         <View style={styles.timeTravelBanner}>
+          <Ionicons name="time" size={16} color="#0369A1" style={{ marginRight: 6 }} />
           <Text style={styles.timeTravelText}>
-            ⏱️ Time Travel active: +{Math.round(simulatedTimeOffsetMs / 86400_000)} days
+            Time Travel active: +{Math.round(simulatedTimeOffsetMs / 86400_000)} days
           </Text>
         </View>
       )}
@@ -184,21 +184,23 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   timeTravelBanner: {
-    backgroundColor: '#FEF3C7',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E0F2FE',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#FDE68A',
-    alignItems: 'center',
+    borderBottomColor: '#BAE6FD',
   },
   timeTravelText: {
     fontSize: 13,
-    color: '#92400E',
-    fontWeight: '700',
+    fontWeight: '600',
+    color: '#0369A1',
   },
   list: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 80,
   },
   card: {
     backgroundColor: Colors.card,
@@ -226,10 +228,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-  },
-  categoryIcon: {
-    fontSize: 14,
-    marginRight: 4,
+    gap: 6,
   },
   categoryText: {
     fontSize: 11,
@@ -237,6 +236,8 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -282,10 +283,14 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   devBox: {
-    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#F1F5F9',
-    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 6,
+    marginTop: 6,
+    alignSelf: 'flex-start',
   },
   devText: {
     fontSize: 11,

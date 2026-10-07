@@ -56,20 +56,20 @@ describe('Notification Escalation Messages', () => {
 
   test('Thriving tone is positive and mentions momentum', () => {
     const msg = getEscalatingMessage('Morning Run', 'fitness', 'thriving');
-    assert.ok(msg.title.includes('✨'));
+    assert.ok(msg.title.includes('Check-in'));
     assert.ok(msg.body.toLowerCase().includes('thriving'));
     assert.ok(msg.body.toLowerCase().includes('momentum'));
   });
 
   test('Good tone is friendly and prompt', () => {
     const msg = getEscalatingMessage('Meditate', 'generic', 'good');
-    assert.ok(msg.title.includes('👋'));
+    assert.ok(msg.title.includes('Time for'));
     assert.ok(msg.body.toLowerCase().includes('progress'));
   });
 
   test('Meh tone gives a light nudge', () => {
     const msg = getEscalatingMessage('Budget Review', 'finance', 'meh');
-    assert.ok(msg.title.includes('👀'));
+    assert.ok(msg.title.includes('forget'));
     assert.ok(msg.body.toLowerCase().includes('foot'));
   });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { G, Path, Circle, Rect, Ellipse, Text as SvgText } from 'react-native-svg';
+import { G, Path, Circle, Rect, Ellipse, Polygon, Text as SvgText } from 'react-native-svg';
 import type { LifeState } from '../../../domain/types.ts';
 
 interface Props {
@@ -88,8 +88,12 @@ export const LifeStateOverlay: React.FC<Props> = ({ lifeState }) => {
 
         {/* Hazard Alert Badge */}
         <Rect x="130" y="440" width="252" height="34" rx="17" fill="#FEF08A" stroke="#CA8A04" strokeWidth="3" />
-        <SvgText x="256" y="463" fill="#854D0E" fontSize="16" fontWeight="bold" textAnchor="middle">
-          ⚠️ LAST CHANCE!
+        {/* Warning triangle icon */}
+        <Polygon points="160,448 171,466 149,466" fill="#B45309" />
+        <Rect x="159" y="453" width="2" height="6" fill="#FEF08A" rx="1" />
+        <Circle cx="160" cy="463" r="1.2" fill="#FEF08A" />
+        <SvgText x="262" y="463" fill="#854D0E" fontSize="16" fontWeight="bold" textAnchor="middle">
+          LAST CHANCE!
         </SvgText>
       </G>
     );

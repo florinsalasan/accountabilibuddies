@@ -14,15 +14,16 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '../../store/useGoalStore.ts';
+import { CategoryIcon } from '../../components/CategoryIcon.tsx';
 import { Colors } from '../../constants/theme.ts';
 import type { Category, GoalType, Cadence } from '../../domain/types.ts';
 
-const CATEGORIES: { id: Category; label: string; icon: string; desc: string }[] = [
-  { id: 'fitness', label: 'Fitness', icon: '🏋️', desc: 'Workouts, runs, stretching' },
-  { id: 'finance', label: 'Finance', icon: '💰', desc: 'Saving, investing, budgeting' },
-  { id: 'learning', label: 'Learning', icon: '📚', desc: 'Reading, skills, languages' },
-  { id: 'creative', label: 'Creative', icon: '🎨', desc: 'Writing, art, projects' },
-  { id: 'generic', label: 'General', icon: '✨', desc: 'Habits, wellness, productivity' },
+const CATEGORIES: { id: Category; label: string; desc: string }[] = [
+  { id: 'fitness', label: 'Fitness', desc: 'Workouts, runs, stretching' },
+  { id: 'finance', label: 'Finance', desc: 'Saving, investing, budgeting' },
+  { id: 'learning', label: 'Learning', desc: 'Reading, skills, languages' },
+  { id: 'creative', label: 'Creative', desc: 'Writing, art, projects' },
+  { id: 'generic', label: 'General', desc: 'Habits, wellness, productivity' },
 ];
 
 const TYPES: { id: GoalType; label: string; desc: string }[] = [
@@ -192,7 +193,13 @@ export default function CreateGoalScreen() {
               style={[styles.categoryCard, category === cat.id && styles.categoryCardSelected]}
               onPress={() => setCategory(cat.id)}
             >
-              <Text style={styles.categoryCardIcon}>{cat.icon}</Text>
+              <View style={styles.categoryCardIcon}>
+                <CategoryIcon
+                  category={cat.id}
+                  size={26}
+                  color={category === cat.id ? Colors.primary : undefined}
+                />
+              </View>
               <Text style={[styles.categoryCardLabel, category === cat.id && styles.categoryCardLabelSelected]}>
                 {cat.label}
               </Text>
@@ -422,7 +429,8 @@ export default function CreateGoalScreen() {
         disabled={isSubmitting}
         onPress={handleSubmit}
       >
-        <Text style={styles.submitButtonText}>Bring My Buddy To Life! 🚀</Text>
+        <Ionicons name="sparkles" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+        <Text style={styles.submitButtonText}>Bring My Buddy To Life!</Text>
       </TouchableOpacity>
       </ScrollView>
     </View>
@@ -494,7 +502,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
   },
   categoryCardIcon: {
-    fontSize: 24,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 4,
   },
   categoryCardLabel: {
@@ -662,6 +672,8 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   submitButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     backgroundColor: Colors.primary,
     paddingVertical: 16,
     borderRadius: 16,
