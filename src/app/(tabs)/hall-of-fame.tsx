@@ -30,7 +30,7 @@ export default function HallOfFameScreen() {
       `Are you ready to resume working on "${title}"? Your buddy will wake up and be ready for a welcome-back check-in!`,
       [
         { text: 'Not yet', style: 'cancel' },
-        { text: 'Wake Up! ☀️', onPress: () => resumeGoal(id) },
+        { text: 'Wake Up!', onPress: () => resumeGoal(id) },
       ],
     );
   };
@@ -44,7 +44,7 @@ export default function HallOfFameScreen() {
         `Did you fulfill your consequence?\n\n"${stake}"`,
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Yes, I paid my stake! 🤝', onPress: () => payStake(id, true) },
+          { text: 'Yes, I paid my stake!', onPress: () => payStake(id, true) },
         ],
       );
     }
@@ -70,7 +70,10 @@ export default function HallOfFameScreen() {
 
           {section === 'completed' && (
             <View>
-              <Text style={styles.statusBadgeGreen}>👑 Living their best life!</Text>
+              <View style={styles.statusBadgeGreenRow}>
+                <Ionicons name="ribbon" size={13} color={Colors.success} style={{ marginRight: 4 }} />
+                <Text style={styles.statusBadgeGreen}>Living their best life!</Text>
+              </View>
               <Text style={styles.dateText}>
                 Completed on {new Date(item.completedAt || item.updatedAt).toLocaleDateString()}
               </Text>
@@ -83,7 +86,10 @@ export default function HallOfFameScreen() {
 
           {section === 'paused' && (
             <View>
-              <Text style={styles.statusBadgeBlue}>💤 Taking a nap</Text>
+              <View style={styles.statusBadgeBlueRow}>
+                <Ionicons name="moon" size={13} color={Colors.primary} style={{ marginRight: 4 }} />
+                <Text style={styles.statusBadgeBlue}>Taking a nap</Text>
+              </View>
               <Text style={styles.dateText}>
                 Paused on {new Date(item.pausedAt || item.updatedAt).toLocaleDateString()}
               </Text>
@@ -99,9 +105,17 @@ export default function HallOfFameScreen() {
 
           {section === 'dead' && (
             <View>
-              <Text style={styles.statusBadgeGray}>
-                {item.deathCause === 'abandoned' ? '🕊️ Abandoned' : '🥀 Perished from neglect'}
-              </Text>
+              <View style={styles.statusBadgeGrayRow}>
+                <Ionicons
+                  name={item.deathCause === 'abandoned' ? 'flag-outline' : 'skull-outline'}
+                  size={13}
+                  color={Colors.textMuted}
+                  style={{ marginRight: 4 }}
+                />
+                <Text style={styles.statusBadgeGray}>
+                  {item.deathCause === 'abandoned' ? 'Abandoned' : 'Perished from neglect'}
+                </Text>
+              </View>
               <Text style={styles.dateText}>
                 Died on {new Date(item.diedAt || item.updatedAt).toLocaleDateString()}
               </Text>
@@ -140,24 +154,42 @@ export default function HallOfFameScreen() {
           style={[styles.segmentBtn, section === 'completed' && styles.segmentActive]}
           onPress={() => setSection('completed')}
         >
+          <Ionicons
+            name="ribbon"
+            size={16}
+            color={section === 'completed' ? Colors.primary : Colors.textMuted}
+            style={{ marginRight: 4 }}
+          />
           <Text style={[styles.segmentText, section === 'completed' && styles.segmentTextActive]}>
-            👑 Retired
+            Retired
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.segmentBtn, section === 'paused' && styles.segmentActive]}
           onPress={() => setSection('paused')}
         >
+          <Ionicons
+            name="moon"
+            size={15}
+            color={section === 'paused' ? Colors.primary : Colors.textMuted}
+            style={{ marginRight: 4 }}
+          />
           <Text style={[styles.segmentText, section === 'paused' && styles.segmentTextActive]}>
-            💤 Napping
+            Napping
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.segmentBtn, section === 'dead' && styles.segmentActive]}
           onPress={() => setSection('dead')}
         >
+          <Ionicons
+            name="skull"
+            size={15}
+            color={section === 'dead' ? '#DC2626' : Colors.textMuted}
+            style={{ marginRight: 4 }}
+          />
           <Text style={[styles.segmentText, section === 'dead' && styles.segmentTextActive]}>
-            🪦 Graveyard
+            Graveyard
           </Text>
         </TouchableOpacity>
       </View>
@@ -169,9 +201,15 @@ export default function HallOfFameScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>
-              {section === 'completed' ? '🏆' : section === 'paused' ? '😴' : '🌱'}
-            </Text>
+            <View style={styles.emptyIconContainer}>
+              {section === 'completed' ? (
+                <Ionicons name="trophy-outline" size={54} color={Colors.warning} />
+              ) : section === 'paused' ? (
+                <Ionicons name="moon-outline" size={54} color={Colors.primary} />
+              ) : (
+                <Ionicons name="leaf-outline" size={54} color={Colors.success} />
+              )}
+            </View>
             <Text style={styles.emptyTitle}>
               {section === 'completed'
                 ? 'No retired buddies yet'
@@ -207,6 +245,8 @@ const styles = StyleSheet.create({
   },
   segmentBtn: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
     paddingVertical: 10,
     alignItems: 'center',
     borderRadius: 8,
@@ -254,38 +294,50 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 6,
   },
-  statusBadgeGreen: {
+  statusBadgeGreenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
     backgroundColor: Colors.successLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 4,
+  },
+  statusBadgeGreen: {
     color: Colors.success,
     fontSize: 11,
     fontWeight: '700',
+  },
+  statusBadgeBlueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     marginBottom: 4,
   },
   statusBadgeBlue: {
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.primaryLight,
     color: Colors.primary,
     fontSize: 11,
     fontWeight: '700',
+  },
+  statusBadgeGrayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     marginBottom: 4,
   },
   statusBadgeGray: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#F1F5F9',
     color: Colors.textMuted,
     fontSize: 11,
     fontWeight: '700',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 4,
   },
   dateText: {
     fontSize: 12,
@@ -369,8 +421,7 @@ const styles = StyleSheet.create({
     paddingVertical: 80,
     paddingHorizontal: 32,
   },
-  emptyIcon: {
-    fontSize: 48,
+  emptyIconContainer: {
     marginBottom: 16,
   },
   emptyTitle: {

@@ -160,7 +160,10 @@ export default function SettingsScreen() {
           {devMode && (
             <View style={styles.timeTravelSection}>
               <View style={styles.divider} />
-              <Text style={styles.timeTravelTitle}>⏱️ Time Travel Sandbox</Text>
+              <View style={styles.timeTravelTitleRow}>
+                <Ionicons name="time" size={17} color="#0284C7" style={{ marginRight: 6 }} />
+                <Text style={styles.timeTravelTitle}>Time Travel Sandbox</Text>
+              </View>
               <Text style={styles.timeTravelDesc}>
                 Simulate time passing to test overdue decay, last chance, and graveyard transitions:
               </Text>
@@ -283,12 +286,16 @@ const styles = StyleSheet.create({
   timeTravelSection: {
     paddingVertical: 14,
   },
+  timeTravelTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 4,
+  },
   timeTravelTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: Colors.text,
-    marginTop: 10,
-    marginBottom: 4,
   },
   timeTravelDesc: {
     fontSize: 12,

@@ -111,12 +111,12 @@ export default function GoalDetailScreen() {
 
   const handleCompletePrompt = () => {
     Alert.alert(
-      'Graduate to Hall of Fame? 👑',
+      'Graduate to Hall of Fame?',
       `Congratulations on accomplishing "${goal.title}"! Your buddy will retire and live their best life in the Hall of Fame.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Complete Goal! 🏆',
+          text: 'Complete Goal!',
           onPress: async () => {
             await completeGoal(goal.id);
             router.back();
@@ -128,7 +128,7 @@ export default function GoalDetailScreen() {
 
   const handleAbandonPrompt = () => {
     Alert.alert(
-      'Abandon Goal? 🪦',
+      'Abandon Goal?',
       goal.stake
         ? `Abandoning will send your buddy to the graveyard and trigger your stake consequence:\n\n"${goal.stake}"\n\nAre you sure you want to abandon?`
         : 'Are you sure you want to abandon this goal? Your buddy will move to the graveyard.',
@@ -199,9 +199,12 @@ export default function GoalDetailScreen() {
         {devMode && (
           <View style={styles.devCard}>
             <View style={styles.devHeaderRow}>
-              <Text style={styles.devText}>
-                🛠️ DEV SCORE: {Math.round(currentHealth)}/100 ({hState.toUpperCase()})
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="construct" size={14} color="#475569" style={{ marginRight: 5 }} />
+                <Text style={styles.devText}>
+                  DEV SCORE: {Math.round(currentHealth)}/100 ({hState.toUpperCase()})
+                </Text>
+              </View>
               <View style={styles.devStepperRow}>
                 <TouchableOpacity
                   style={styles.devStepBtn}
@@ -228,8 +231,14 @@ export default function GoalDetailScreen() {
                 style={[styles.devPresetBtn, hState === 'thriving' && styles.devPresetBtnActive]}
                 onPress={() => setGoalHealth(goal.id, 95)}
               >
+                <Ionicons
+                  name="sparkles"
+                  size={12}
+                  color={hState === 'thriving' ? '#0369A1' : '#D97706'}
+                  style={{ marginRight: 3 }}
+                />
                 <Text style={[styles.devPresetText, hState === 'thriving' && styles.devPresetTextActive]}>
-                  🌟 Thriving
+                  Thriving
                 </Text>
               </TouchableOpacity>
 
@@ -237,8 +246,14 @@ export default function GoalDetailScreen() {
                 style={[styles.devPresetBtn, hState === 'good' && styles.devPresetBtnActive]}
                 onPress={() => setGoalHealth(goal.id, 70)}
               >
+                <Ionicons
+                  name="happy"
+                  size={12}
+                  color={hState === 'good' ? '#0369A1' : '#16A34A'}
+                  style={{ marginRight: 3 }}
+                />
                 <Text style={[styles.devPresetText, hState === 'good' && styles.devPresetTextActive]}>
-                  🙂 Good
+                  Good
                 </Text>
               </TouchableOpacity>
 
@@ -246,8 +261,14 @@ export default function GoalDetailScreen() {
                 style={[styles.devPresetBtn, hState === 'meh' && styles.devPresetBtnActive]}
                 onPress={() => setGoalHealth(goal.id, 50)}
               >
+                <Ionicons
+                  name="ellipse"
+                  size={10}
+                  color={hState === 'meh' ? '#0369A1' : '#D97706'}
+                  style={{ marginRight: 3 }}
+                />
                 <Text style={[styles.devPresetText, hState === 'meh' && styles.devPresetTextActive]}>
-                  😐 Meh
+                  Meh
                 </Text>
               </TouchableOpacity>
 
@@ -255,8 +276,14 @@ export default function GoalDetailScreen() {
                 style={[styles.devPresetBtn, hState === 'struggling' && styles.devPresetBtnActive]}
                 onPress={() => setGoalHealth(goal.id, 30)}
               >
+                <Ionicons
+                  name="sad"
+                  size={12}
+                  color={hState === 'struggling' ? '#0369A1' : '#EA580C'}
+                  style={{ marginRight: 3 }}
+                />
                 <Text style={[styles.devPresetText, hState === 'struggling' && styles.devPresetTextActive]}>
-                  😰 Struggling
+                  Struggling
                 </Text>
               </TouchableOpacity>
 
@@ -264,8 +291,14 @@ export default function GoalDetailScreen() {
                 style={[styles.devPresetBtn, hState === 'dying' && styles.devPresetBtnActive]}
                 onPress={() => setGoalHealth(goal.id, 10)}
               >
+                <Ionicons
+                  name="skull"
+                  size={12}
+                  color={hState === 'dying' ? '#0369A1' : '#DC2626'}
+                  style={{ marginRight: 3 }}
+                />
                 <Text style={[styles.devPresetText, hState === 'dying' && styles.devPresetTextActive]}>
-                  💀 Dying
+                  Dying
                 </Text>
               </TouchableOpacity>
             </View>
@@ -313,7 +346,13 @@ export default function GoalDetailScreen() {
                 style={[styles.ratingBtn, selectedRating === 'on_track' && styles.ratingSelected]}
                 onPress={() => setSelectedRating('on_track')}
               >
-                <Text style={styles.ratingEmoji}>🚀</Text>
+                <View style={styles.ratingIconContainer}>
+                  <Ionicons
+                    name="rocket"
+                    size={22}
+                    color={selectedRating === 'on_track' ? Colors.primary : Colors.textMuted}
+                  />
+                </View>
                 <Text style={styles.ratingTitle}>On Track</Text>
                 <Text style={styles.ratingSub}>+20 health</Text>
               </TouchableOpacity>
@@ -322,7 +361,13 @@ export default function GoalDetailScreen() {
                 style={[styles.ratingBtn, selectedRating === 'some' && styles.ratingSelected]}
                 onPress={() => setSelectedRating('some')}
               >
-                <Text style={styles.ratingEmoji}>👍</Text>
+                <View style={styles.ratingIconContainer}>
+                  <Ionicons
+                    name="thumbs-up"
+                    size={22}
+                    color={selectedRating === 'some' ? Colors.primary : Colors.textMuted}
+                  />
+                </View>
                 <Text style={styles.ratingTitle}>A Little</Text>
                 <Text style={styles.ratingSub}>+10 health</Text>
               </TouchableOpacity>
@@ -331,7 +376,13 @@ export default function GoalDetailScreen() {
                 style={[styles.ratingBtn, selectedRating === 'none' && styles.ratingSelected]}
                 onPress={() => setSelectedRating('none')}
               >
-                <Text style={styles.ratingEmoji}>⏳</Text>
+                <View style={styles.ratingIconContainer}>
+                  <Ionicons
+                    name="hourglass"
+                    size={22}
+                    color={selectedRating === 'none' ? Colors.primary : Colors.textMuted}
+                  />
+                </View>
                 <Text style={styles.ratingTitle}>Nothing</Text>
                 <Text style={styles.ratingSub}>0 gain</Text>
               </TouchableOpacity>
@@ -349,7 +400,8 @@ export default function GoalDetailScreen() {
               disabled={isSubmitting}
               onPress={handleCheckInSubmit}
             >
-              <Text style={styles.submitCheckInText}>Save Check-in 🌟</Text>
+              <Ionicons name="checkmark-done" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.submitCheckInText}>Save Check-in</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -471,7 +523,7 @@ export default function GoalDetailScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Pause Buddy (Take a Nap) 💤</Text>
+            <Text style={styles.modalTitle}>Pause Buddy (Take a Nap)</Text>
             <Text style={styles.modalDesc}>
               {`Life happens! Whether you're recovering from an injury (like a torn ACL) or going on vacation, pausing preserves your health with zero penalties.`}
             </Text>
@@ -615,6 +667,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   devPresetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#CBD5E1',
@@ -715,8 +769,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     backgroundColor: Colors.primaryLight,
   },
-  ratingEmoji: {
-    fontSize: 22,
+  ratingIconContainer: {
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 2,
   },
   ratingTitle: {
@@ -741,6 +797,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   submitCheckInBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     backgroundColor: Colors.primary,
     paddingVertical: 14,
     borderRadius: 12,

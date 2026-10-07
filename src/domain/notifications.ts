@@ -14,21 +14,21 @@ export function getEscalatingMessage(
 ): { title: string; body: string } {
   if (hState === 'thriving') {
     return {
-      title: `✨ ${title} Check-in`,
+      title: `${title} Check-in`,
       body: `Your buddy is thriving! Keep the momentum rolling with a quick update.`,
     };
   }
 
   if (hState === 'good') {
     return {
-      title: `👋 Time for ${title}`,
+      title: `Time for ${title}`,
       body: `Hey friend! How's progress going today? Let's check in.`,
     };
   }
 
   if (hState === 'meh') {
     return {
-      title: `👀 Don't forget ${title}`,
+      title: `Don't forget ${title}`,
       body: `Your buddy is tapping their foot... don't leave them hanging!`,
     };
   }
@@ -36,37 +36,37 @@ export function getEscalatingMessage(
   if (hState === 'struggling') {
     if (category === 'fitness') {
       return {
-        title: `🛋️ Softening up on ${title}!`,
-        body: `Your gym buddy is currently lounging on the couch. Save him with a workout!`,
+        title: `Softening up on ${title}!`,
+        body: `Your gym buddy is currently lounging on the couch. Save them with a workout!`,
       };
     }
     if (category === 'finance') {
       return {
-        title: `💸 Cobwebs in ${title}!`,
+        title: `Cobwebs in ${title}!`,
         body: `Your financial buddy can hear moths in the wallet. Let's make progress!`,
       };
     }
     if (category === 'learning') {
       return {
-        title: `📚 Brain rust on ${title}!`,
+        title: `Brain rust on ${title}!`,
         body: `Your study buddy is falling asleep with a book on their face. Wake them up with progress!`,
       };
     }
     if (category === 'creative') {
       return {
-        title: `🎨 Paint drying on ${title}!`,
+        title: `Paint drying on ${title}!`,
         body: `Your muse is packing up their bags. Drop in a quick spark to keep them around!`,
       };
     }
     return {
-      title: `😰 ${title} buddy needs you!`,
+      title: `${title} buddy needs you!`,
       body: `I'm starting to get worried. Check in before things get worse!`,
     };
   }
 
   // Dying (<20 health)
   return {
-    title: `🚨 EMERGENCY: ${title}`,
+    title: `EMERGENCY: ${title}`,
     body: `Your buddy is literally on life support! One check-in can turn this around!`,
   };
 }
@@ -77,7 +77,7 @@ export function getLastChanceMessage(
 ): { title: string; body: string } {
   const hasStake = typeof stake === 'string' && stake.trim().length > 0;
   return {
-    title: `⚠️ LAST CHANCE: ${title}`,
+    title: `LAST CHANCE: ${title}`,
     body: hasStake
       ? `Your buddy has hit 0 health! Check in with progress now or pay your stake: "${stake!.trim()}"!`
       : `Your buddy has hit 0 health! Check in now before they go to the graveyard!`,
