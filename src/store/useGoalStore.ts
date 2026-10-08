@@ -54,6 +54,18 @@ interface GoalStore {
   resumeGoal: (goalId: string) => Promise<void>;
   completeGoal: (goalId: string) => Promise<void>;
   abandonGoal: (goalId: string) => Promise<void>;
+  updateGoal: (
+    goalId: string,
+    data: {
+      title?: string;
+      why?: string;
+      reminderMinutes?: number;
+      targetValue?: number;
+      unit?: string;
+      targetDate?: number;
+      stake?: string;
+    },
+  ) => Promise<void>;
   payStake: (goalId: string, paid: boolean) => Promise<void>;
   deleteGoal: (goalId: string) => Promise<void>;
 
@@ -179,6 +191,18 @@ export const useGoalStore = create<GoalStore>((set, get) => ({
     await get().loadGoals();
     if (get().activeGoalDetail?.goal.id === goalId) {
       await get().loadGoalDetail(goalId);
+    }
+  },
+
+  updateGoal: async (goalId, data) => {
+    const detail = await GoalRepo.update(goalId, data);
+    if (detail) {
+      await scheduleGoalReminder(detail.goal as any, detail.goal.title);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await get().loadGoals();
+      if (get().activeGoalDetail?.goal.id === goalId) {
+        await get().loadGoalDetail(goalId);
+      }
     }
   },
 

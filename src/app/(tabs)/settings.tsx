@@ -7,8 +7,11 @@ import {
   Switch,
   TouchableOpacity,
   Alert,
+  Linking,
+  AppState,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
 import { useGoalStore } from '../../store/useGoalStore.ts';
 import { SettingsRepo } from '../../db/repo.ts';
 import { exportBackup, importBackup } from '../../services/backup.ts';
@@ -20,10 +23,40 @@ export default function SettingsScreen() {
   const [quietHours, setQuietHours] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied'>('granted');
 
   useEffect(() => {
     SettingsRepo.get('quiet_hours', 'false').then((val) => setQuietHours(val === 'true'));
+
+    void Notifications.getPermissionsAsync().then(
+      (res) => setPermissionStatus(res.granted ? 'granted' : 'denied'),
+      () => setPermissionStatus('denied'),
+    );
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void Notifications.getPermissionsAsync().then(
+          (res) => setPermissionStatus(res.granted ? 'granted' : 'denied'),
+          () => setPermissionStatus('denied'),
+        );
+      }
+    });
+
+    return () => subscription.remove();
   }, []);
+
+  const handleFixPermissions = async () => {
+    try {
+      const res = await Notifications.requestPermissionsAsync();
+      if (res.granted) {
+        setPermissionStatus('granted');
+        return;
+      }
+    } catch {
+      // ignore
+    }
+    await Linking.openSettings();
+  };
 
   const handleToggleQuietHours = async (val: boolean) => {
     setQuietHours(val);
@@ -117,6 +150,50 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionHeader}>NOTIFICATIONS</Text>
         <View style={styles.card}>
+          {/* Permission Status */}
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor:
+                      permissionStatus === 'granted' ? Colors.successLight : '#FEE2E2',
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={permissionStatus === 'granted' ? 'notifications' : 'notifications-off'}
+                  size={20}
+                  color={permissionStatus === 'granted' ? Colors.success : '#DC2626'}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Device Permissions</Text>
+                <Text style={styles.rowSubtitle}>
+                  {permissionStatus === 'granted'
+                    ? 'Active — Reminders deliver on schedule'
+                    : 'Disabled — Reminders blocked by OS'}
+                </Text>
+              </View>
+            </View>
+            {permissionStatus === 'granted' ? (
+              <View style={styles.statusPillActive}>
+                <Ionicons name="checkmark-circle" size={13} color={Colors.success} />
+                <Text style={styles.statusPillTextActive}>ACTIVE</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.enableBtn}
+                onPress={handleFixPermissions}
+              >
+                <Text style={styles.enableBtnText}>Enable</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.divider} />
+
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: '#FEF3C7' }]}>
@@ -371,5 +448,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#0284C7',
+  },
+  statusPillActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.successLight,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusPillTextActive: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.success,
+  },
+  enableBtn: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  enableBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 12,
   },
 });
