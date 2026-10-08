@@ -6,7 +6,42 @@ import * as Notifications from 'expo-notifications';
 import { initDatabase } from '../db/init.ts';
 import { setupNotificationChannels, requestNotificationPermissions } from '../services/notifications.ts';
 import { useGoalStore } from '../store/useGoalStore.ts';
-import { Colors } from '../constants/theme.ts';
+import { ThemeProvider, useTheme } from '../context/ThemeContext.tsx';
+
+function AppNavigation() {
+  const { colors, isDark } = useTheme();
+
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.card },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontWeight: '700' },
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="goals/create"
+          options={{
+            title: 'New Accountabilibuddy',
+            presentation: 'modal',
+            headerBackTitle: 'Cancel',
+          }}
+        />
+        <Stack.Screen
+          name="goals/[id]"
+          options={{
+            title: 'Buddy Details',
+            headerBackTitle: 'Back',
+          }}
+        />
+      </Stack>
+    </>
+  );
+}
 
 export default function RootLayout() {
   useEffect(() => {
@@ -52,33 +87,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: Colors.card },
-          headerTintColor: Colors.text,
-          headerTitleStyle: { fontWeight: '700' },
-          contentStyle: { backgroundColor: Colors.background },
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="goals/create"
-          options={{
-            title: 'New Accountabilibuddy',
-            presentation: 'modal',
-            headerBackTitle: 'Cancel',
-          }}
-        />
-        <Stack.Screen
-          name="goals/[id]"
-          options={{
-            title: 'Buddy Details',
-            headerBackTitle: 'Back',
-          }}
-        />
-      </Stack>
-    </>
+    <ThemeProvider>
+      <AppNavigation />
+    </ThemeProvider>
   );
 }

@@ -27,9 +27,10 @@ import {
   checkInOpensAt,
 } from '../../domain/health.ts';
 import { CADENCE_LABEL } from '../../domain/periods.ts';
-import { Colors } from '../../constants/theme.ts';
+import type { ThemeColors } from '../../constants/theme.ts';
 import type { Rating } from '../../domain/types.ts';
 import { useCurrentTime } from '../../hooks/useCurrentTime.ts';
+import { useTheme } from '../../context/ThemeContext.tsx';
 
 function getBuddyReaction(
   category: string,
@@ -103,6 +104,8 @@ function formatActivityDate(timestamp: number) {
 
 export default function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors, isDark } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const {
     activeGoalDetail,
     loadGoalDetail,
@@ -194,7 +197,7 @@ export default function GoalDetailScreen() {
   if (!activeGoalDetail || activeGoalDetail.goal.id !== id) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -376,16 +379,16 @@ export default function GoalDetailScreen() {
             <Text style={styles.badgeText}>{CADENCE_LABEL[goal.cadence]}</Text>
           </View>
           {goal.targetDate ? (
-            <View style={[styles.badge, { backgroundColor: Colors.primaryLight }]}>
-              <Ionicons name="calendar-outline" size={14} color={Colors.primary} />
-              <Text style={[styles.badgeText, { color: Colors.primary }]}>
+            <View style={[styles.badge, { backgroundColor: colors.primaryLight }]}>
+              <Ionicons name="calendar-outline" size={14} color={colors.primary} />
+              <Text style={[styles.badgeText, { color: colors.primary }]}>
                 Target: {new Date(goal.targetDate).toLocaleDateString()}
               </Text>
             </View>
           ) : null}
-          <View style={[styles.badge, { backgroundColor: Colors.warningLight }]}>
-            <Ionicons name="flame" size={14} color={Colors.warning} />
-            <Text style={[styles.badgeText, { color: '#B45309' }]}>
+          <View style={[styles.badge, { backgroundColor: colors.warningLight }]}>
+            <Ionicons name="flame" size={14} color={colors.warning} />
+            <Text style={[styles.badgeText, { color: isDark ? '#FCD34D' : '#B45309' }]}>
               {goal.onTimeStreak} On-Time Streak
             </Text>
           </View>
@@ -545,7 +548,7 @@ export default function GoalDetailScreen() {
                   <Ionicons
                     name="rocket"
                     size={22}
-                    color={selectedRating === 'on_track' ? Colors.primary : Colors.textMuted}
+                    color={selectedRating === 'on_track' ? colors.primary : colors.textMuted}
                   />
                 </View>
                 <Text style={styles.ratingTitle}>On Track</Text>
@@ -560,7 +563,7 @@ export default function GoalDetailScreen() {
                   <Ionicons
                     name="thumbs-up"
                     size={22}
-                    color={selectedRating === 'some' ? Colors.primary : Colors.textMuted}
+                    color={selectedRating === 'some' ? colors.primary : colors.textMuted}
                   />
                 </View>
                 <Text style={styles.ratingTitle}>A Little</Text>
@@ -575,7 +578,7 @@ export default function GoalDetailScreen() {
                   <Ionicons
                     name="hourglass"
                     size={22}
-                    color={selectedRating === 'none' ? Colors.primary : Colors.textMuted}
+                    color={selectedRating === 'none' ? colors.primary : colors.textMuted}
                   />
                 </View>
                 <Text style={styles.ratingTitle}>Nothing</Text>
@@ -586,6 +589,7 @@ export default function GoalDetailScreen() {
             <TextInput
               style={styles.noteInput}
               placeholder="Add an optional note about your progress..."
+              placeholderTextColor={colors.textMuted}
               value={checkInNote}
               onChangeText={setCheckInNote}
             />
@@ -601,7 +605,7 @@ export default function GoalDetailScreen() {
           </View>
         ) : (
           <View style={styles.lockedCheckInCard}>
-            <Ionicons name="time-outline" size={24} color={Colors.textMuted} />
+            <Ionicons name="time-outline" size={24} color={colors.textMuted} />
             <Text style={styles.lockedText}>
               Next check-in window opens {new Date(opensAt).toLocaleDateString()} at{' '}
               {new Date(opensAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.
@@ -628,7 +632,7 @@ export default function GoalDetailScreen() {
                 <Ionicons
                   name={m.doneAt ? 'checkbox' : 'square-outline'}
                   size={24}
-                  color={m.doneAt ? Colors.success : Colors.textMuted}
+                  color={m.doneAt ? colors.success : colors.textMuted}
                 />
                 <Text
                   style={[
@@ -653,6 +657,7 @@ export default function GoalDetailScreen() {
               <TextInput
                 style={styles.quickNoteInput}
                 placeholder={`e.g. +${quickAmount} ${goal.unit || 'progress'} completed today`}
+                placeholderTextColor={colors.textMuted}
                 value={quickNote}
                 onChangeText={setQuickNote}
               />
@@ -686,7 +691,7 @@ export default function GoalDetailScreen() {
         <Text style={styles.sectionTitle}>RECENT ACTIVITY</Text>
         {combinedActivities.length === 0 ? (
           <View style={styles.emptyActivityCard}>
-            <Ionicons name="newspaper-outline" size={24} color={Colors.textMuted} />
+            <Ionicons name="newspaper-outline" size={24} color={colors.textMuted} />
             <Text style={styles.emptyActivityText}>No activity recorded yet.</Text>
             <Text style={styles.emptyActivitySub}>
               Check-ins and progress updates will appear here!
@@ -699,36 +704,36 @@ export default function GoalDetailScreen() {
               const isLast = idx === combinedActivities.length - 1;
 
               let iconName: any = 'checkmark-circle-outline';
-              let iconColor = Colors.primary;
-              let iconBg = '#F1F5F9';
+              let iconColor = colors.primary;
+              let iconBg = isDark ? '#1E293B' : '#F1F5F9';
               let title = 'Activity logged';
 
               if (isCheckIn) {
                 if (item.rating === 'on_track') {
                   iconName = 'rocket';
-                  iconColor = Colors.success;
-                  iconBg = '#DCFCE7';
+                  iconColor = colors.success;
+                  iconBg = isDark ? '#064E3B' : '#DCFCE7';
                   title = 'Checked in: On Track';
                 } else if (item.rating === 'some') {
                   iconName = 'thumbs-up';
                   iconColor = '#0284C7';
-                  iconBg = '#E0F2FE';
+                  iconBg = isDark ? '#082F49' : '#E0F2FE';
                   title = 'Checked in: A Little';
                 } else if (item.rating === 'none') {
                   iconName = 'hourglass';
                   iconColor = '#D97706';
-                  iconBg = '#FEF3C7';
+                  iconBg = isDark ? '#451A03' : '#FEF3C7';
                   title = 'Checked in: Nothing Done';
                 } else if (item.rating === 'missed') {
                   iconName = 'alert-circle';
-                  iconColor = '#DC2626';
-                  iconBg = '#FEE2E2';
+                  iconColor = colors.danger;
+                  iconBg = isDark ? '#450A0A' : '#FEE2E2';
                   title = 'Check-in Missed';
                 }
               } else {
                 iconName = 'trending-up';
-                iconColor = Colors.primary;
-                iconBg = Colors.primaryLight;
+                iconColor = colors.primary;
+                iconBg = colors.primaryLight;
                 title = `Progress: +${item.amount} ${goal.unit || 'pts'}`;
               }
 
@@ -748,10 +753,10 @@ export default function GoalDetailScreen() {
                               {
                                 color:
                                   item.healthDelta > 0
-                                    ? Colors.success
+                                    ? colors.success
                                     : item.healthDelta < 0
-                                    ? '#DC2626'
-                                    : Colors.textMuted,
+                                    ? colors.danger
+                                    : colors.textMuted,
                               },
                             ]}
                           >
@@ -776,30 +781,30 @@ export default function GoalDetailScreen() {
         <Text style={styles.sectionTitle}>BUDDY MANAGEMENT</Text>
         <View style={styles.actionsCard}>
           <TouchableOpacity style={styles.actionRow} onPress={handleOpenEditModal}>
-            <Ionicons name="create-outline" size={20} color={Colors.primary} />
+            <Ionicons name="create-outline" size={20} color={colors.primary} />
             <Text style={styles.actionRowText}>Edit Buddy Settings</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.actionRow} onPress={handleOpenPauseModal}>
-            <Ionicons name="bed-outline" size={20} color={Colors.primary} />
+            <Ionicons name="bed-outline" size={20} color={colors.primary} />
             <Text style={styles.actionRowText}>Pause Buddy (Take a Nap)</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.actionRow} onPress={handleCompletePrompt}>
-            <Ionicons name="ribbon-outline" size={20} color={Colors.success} />
+            <Ionicons name="ribbon-outline" size={20} color={colors.success} />
             <Text style={styles.actionRowText}>Complete & Retire to Hall of Fame</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.actionRow} onPress={handleAbandonPrompt}>
-            <Ionicons name="skull-outline" size={20} color="#DC2626" />
-            <Text style={[styles.actionRowText, { color: '#DC2626' }]}>
+            <Ionicons name="skull-outline" size={20} color={colors.danger} />
+            <Text style={[styles.actionRowText, { color: colors.danger }]}>
               Abandon Goal (Moves to Graveyard)
             </Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.actionRow} onPress={handleDeletePrompt}>
-            <Ionicons name="trash-outline" size={20} color={Colors.textMuted} />
-            <Text style={[styles.actionRowText, { color: Colors.textMuted }]}>Delete Permanently</Text>
+            <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
+            <Text style={[styles.actionRowText, { color: colors.textMuted }]}>Delete Permanently</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -826,7 +831,7 @@ export default function GoalDetailScreen() {
             <TextInput
               style={styles.modalInput}
               placeholder="Why are you pausing? (optional reflection)"
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor={colors.textMuted}
               value={pauseReason}
               onChangeText={setPauseReason}
               multiline
@@ -877,7 +882,7 @@ export default function GoalDetailScreen() {
                 value={editTitle}
                 onChangeText={setEditTitle}
                 placeholder="e.g. Daily Reading"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
 
               <Text style={styles.editFieldLabel}>Why this matters to you</Text>
@@ -886,7 +891,7 @@ export default function GoalDetailScreen() {
                 value={editWhy}
                 onChangeText={setEditWhy}
                 placeholder="e.g. Expand knowledge & focus"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
 
               <Text style={styles.editFieldLabel}>Daily Reminder Time (24h)</Text>
@@ -898,7 +903,7 @@ export default function GoalDetailScreen() {
                   keyboardType="numeric"
                   maxLength={2}
                   placeholder="HH"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
                 <Text style={styles.timeColon}>:</Text>
                 <TextInput
@@ -908,7 +913,7 @@ export default function GoalDetailScreen() {
                   keyboardType="numeric"
                   maxLength={2}
                   placeholder="MM"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
                 <Text style={styles.timeHelperText}>
                   ({editHour.padStart(2, '0')}:{editMinute.padStart(2, '0')})
@@ -925,14 +930,14 @@ export default function GoalDetailScreen() {
                       onChangeText={setEditTargetValue}
                       keyboardType="numeric"
                       placeholder="Target"
-                      placeholderTextColor={Colors.textMuted}
+                      placeholderTextColor={colors.textMuted}
                     />
                     <TextInput
                       style={[styles.editInput, { flex: 1 }]}
                       value={editUnit}
                       onChangeText={setEditUnit}
                       placeholder="Unit (e.g. pages)"
-                      placeholderTextColor={Colors.textMuted}
+                      placeholderTextColor={colors.textMuted}
                     />
                   </View>
                 </>
@@ -944,7 +949,7 @@ export default function GoalDetailScreen() {
                 value={editStake}
                 onChangeText={setEditStake}
                 placeholder="e.g. Clean garage or donate $25 to rival team"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 multiline
               />
             </ScrollView>
@@ -970,636 +975,639 @@ export default function GoalDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarHeader: {
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  goalTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: Colors.text,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  goalWhy: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: Colors.textMuted,
-    marginTop: 4,
-    textAlign: 'center',
-    paddingHorizontal: 16,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 12,
-    justifyContent: 'center',
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  devCard: {
-    marginTop: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 12,
-    borderRadius: 12,
-    width: '100%',
-  },
-  devHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-  },
-  devStepperRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  devStepBtn: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  devStepBtnText: {
-    fontSize: 12,
-    fontFamily: 'monospace',
-    fontWeight: '700',
-    color: '#334155',
-  },
-  devText: {
-    fontSize: 12,
-    fontFamily: 'monospace',
-    fontWeight: '700',
-    color: '#0F172A',
-  },
-  devSubText: {
-    fontSize: 11,
-    fontFamily: 'monospace',
-    color: '#64748B',
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  devPresetRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 10,
-    width: '100%',
-  },
-  devPresetBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  devPresetBtnActive: {
-    backgroundColor: '#E0F2FE',
-    borderColor: '#0284C7',
-  },
-  devPresetText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#475569',
-  },
-  devPresetTextActive: {
-    color: '#0369A1',
-    fontWeight: '700',
-  },
-  devNotifBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F0F9FF',
-    borderWidth: 1,
-    borderColor: '#BAE6FD',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-    width: '100%',
-  },
-  devNotifBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#0284C7',
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-    marginHorizontal: 4,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.textMuted,
-    letterSpacing: 0.5,
-  },
-  openPill: {
-    backgroundColor: Colors.successLight,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  openPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: Colors.success,
-  },
-  opensLaterText: {
-    fontSize: 12,
-    color: Colors.textMuted,
-  },
-  checkInCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  checkInPrompt: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 14,
-  },
-  ratingsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14,
-  },
-  ratingBtn: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  ratingSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
-  },
-  ratingIconContainer: {
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
-  },
-  ratingTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  ratingSub: {
-    fontSize: 10,
-    color: Colors.textMuted,
-    marginTop: 2,
-  },
-  noteInput: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: Colors.text,
-    marginBottom: 12,
-  },
-  submitCheckInBtn: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  submitCheckInText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  lockedCheckInCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 6,
-  },
-  lockedText: {
-    fontSize: 13,
-    color: Colors.text,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  lockedSubText: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    textAlign: 'center',
-  },
-  milestonesList: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  milestoneItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-  },
-  milestoneItemTitle: {
-    fontSize: 14,
-    color: Colors.text,
-    flex: 1,
-  },
-  milestoneDone: {
-    textDecorationLine: 'line-through',
-    color: Colors.textMuted,
-  },
-  quickLogCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  quickLogRow: {
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'center',
-  },
-  quickAmountInput: {
-    width: 48,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    textAlign: 'center',
-    paddingVertical: 8,
-    fontWeight: '700',
-  },
-  quickNoteInput: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 13,
-  },
-  quickLogBtn: {
-    backgroundColor: Colors.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stakeCard: {
-    flexDirection: 'row',
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 16,
-    padding: 14,
-    gap: 12,
-  },
-  stakeTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#991B1B',
-  },
-  stakeBody: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: '#7F1D1D',
-    marginVertical: 4,
-  },
-  stakeNotice: {
-    fontSize: 11,
-    color: '#B91C1C',
-  },
-  actionsCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 14,
-  },
-  actionRowText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalContent: {
-    backgroundColor: Colors.card,
-    borderRadius: 20,
-    padding: 20,
-    width: '100%',
-    maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  modalDesc: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  modalInput: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 14,
-    color: Colors.text,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: 16,
-  },
-  modalBtnRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
-  },
-  modalCancelBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-  },
-  modalCancelText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.textMuted,
-  },
-  modalConfirmBtn: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-  },
-  modalConfirmText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  avatarContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  speechBubble: {
-    position: 'absolute',
-    top: 10,
-    zIndex: 10,
-    backgroundColor: '#1E293B',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 16,
-    maxWidth: '92%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 6,
-  },
-  speechBubbleText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  speechBubbleArrow: {
-    position: 'absolute',
-    bottom: -6,
-    alignSelf: 'center',
-    width: 0,
-    height: 0,
-    borderLeftWidth: 6,
-    borderRightWidth: 6,
-    borderTopWidth: 6,
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: '#1E293B',
-  },
-  avatarTouchArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activityCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 10,
-    gap: 12,
-  },
-  activityIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  activityTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  activityDelta: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  activityNote: {
-    fontSize: 12,
-    fontStyle: 'italic',
-    color: Colors.textMuted,
-    marginTop: 3,
-  },
-  activityDate: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    marginTop: 4,
-  },
-  emptyActivityCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 6,
-  },
-  emptyActivityText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  emptyActivitySub: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    textAlign: 'center',
-  },
-  editModalContent: {
-    backgroundColor: Colors.card,
-    borderRadius: 20,
-    padding: 20,
-    width: '100%',
-    maxWidth: 420,
-    maxHeight: '85%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  editFieldLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.textMuted,
-    marginTop: 10,
-    marginBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  editInput: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
-    color: Colors.text,
-  },
-  timeInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  timeInput: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    fontWeight: '700',
-    width: 54,
-    textAlign: 'center',
-    color: Colors.text,
-  },
-  timeColon: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: Colors.text,
-  },
-  timeHelperText: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    fontWeight: '500',
-  },
-  editScrollView: {
-    maxHeight: 280,
-  },
-  editScrollContent: {
-    paddingBottom: 16,
-  },
-});
+const createStyles = (colors: ThemeColors, isDark: boolean) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 40,
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarHeader: {
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    goalTitle: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: colors.text,
+      marginTop: 12,
+      textAlign: 'center',
+    },
+    goalWhy: {
+      fontSize: 14,
+      fontStyle: 'italic',
+      color: colors.textMuted,
+      marginTop: 4,
+      textAlign: 'center',
+      paddingHorizontal: 16,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginTop: 12,
+      justifyContent: 'center',
+    },
+    badge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: colors.primaryLight,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    badgeText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.primary,
+    },
+    devCard: {
+      marginTop: 12,
+      backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+      borderWidth: 1,
+      borderColor: isDark ? '#334155' : '#E2E8F0',
+      padding: 12,
+      borderRadius: 12,
+      width: '100%',
+    },
+    devHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+    },
+    devStepperRow: {
+      flexDirection: 'row',
+      gap: 6,
+    },
+    devStepBtn: {
+      backgroundColor: isDark ? '#334155' : '#E2E8F0',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+    },
+    devStepBtnText: {
+      fontSize: 12,
+      fontFamily: 'monospace',
+      fontWeight: '700',
+      color: isDark ? '#F1F5F9' : '#334155',
+    },
+    devText: {
+      fontSize: 12,
+      fontFamily: 'monospace',
+      fontWeight: '700',
+      color: colors.text,
+    },
+    devSubText: {
+      fontSize: 11,
+      fontFamily: 'monospace',
+      color: colors.textMuted,
+      marginTop: 2,
+      marginBottom: 8,
+    },
+    devPresetRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+      marginBottom: 10,
+      width: '100%',
+    },
+    devPresetBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    devPresetBtnActive: {
+      backgroundColor: isDark ? '#082F49' : '#E0F2FE',
+      borderColor: isDark ? '#38BDF8' : '#0284C7',
+    },
+    devPresetText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    devPresetTextActive: {
+      color: isDark ? '#38BDF8' : '#0369A1',
+      fontWeight: '700',
+    },
+    devNotifBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: isDark ? '#082F49' : '#F0F9FF',
+      borderWidth: 1,
+      borderColor: isDark ? '#0284C7' : '#BAE6FD',
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      gap: 6,
+      width: '100%',
+    },
+    devNotifBtnText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: isDark ? '#38BDF8' : '#0284C7',
+    },
+    section: {
+      marginBottom: 20,
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+      marginHorizontal: 4,
+    },
+    sectionTitle: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.textMuted,
+      letterSpacing: 0.5,
+    },
+    openPill: {
+      backgroundColor: colors.successLight,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 8,
+    },
+    openPillText: {
+      fontSize: 11,
+      fontWeight: '800',
+      color: colors.success,
+    },
+    opensLaterText: {
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    checkInCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    checkInPrompt: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: 14,
+    },
+    ratingsRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 14,
+    },
+    ratingBtn: {
+      flex: 1,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    ratingSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryLight,
+    },
+    ratingIconContainer: {
+      height: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 2,
+    },
+    ratingTitle: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    ratingSub: {
+      fontSize: 10,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    noteInput: {
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 14,
+      color: colors.text,
+      marginBottom: 12,
+    },
+    submitCheckInBtn: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      backgroundColor: colors.primary,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    submitCheckInText: {
+      color: '#FFFFFF',
+      fontSize: 15,
+      fontWeight: '700',
+    },
+    lockedCheckInCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 16,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 6,
+    },
+    lockedText: {
+      fontSize: 13,
+      color: colors.text,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+    lockedSubText: {
+      fontSize: 12,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+    milestonesList: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    milestoneItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 8,
+    },
+    milestoneItemTitle: {
+      fontSize: 14,
+      color: colors.text,
+      flex: 1,
+    },
+    milestoneDone: {
+      textDecorationLine: 'line-through',
+      color: colors.textMuted,
+    },
+    quickLogCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    quickLogRow: {
+      flexDirection: 'row',
+      gap: 8,
+      alignItems: 'center',
+    },
+    quickAmountInput: {
+      width: 48,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      textAlign: 'center',
+      paddingVertical: 8,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    quickNoteInput: {
+      flex: 1,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      fontSize: 13,
+      color: colors.text,
+    },
+    quickLogBtn: {
+      backgroundColor: colors.primary,
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stakeCard: {
+      flexDirection: 'row',
+      backgroundColor: isDark ? '#450A0A' : '#FEF2F2',
+      borderWidth: 1,
+      borderColor: isDark ? '#7F1D1D' : '#FECACA',
+      borderRadius: 16,
+      padding: 14,
+      gap: 12,
+    },
+    stakeTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: isDark ? '#FCA5A5' : '#991B1B',
+    },
+    stakeBody: {
+      fontSize: 14,
+      fontStyle: 'italic',
+      color: isDark ? '#FECACA' : '#7F1D1D',
+      marginVertical: 4,
+    },
+    stakeNotice: {
+      fontSize: 11,
+      color: isDark ? '#F87171' : '#B91C1C',
+    },
+    actionsCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 14,
+    },
+    actionRowText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.65)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      padding: 20,
+      width: '100%',
+      maxWidth: 400,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    modalDesc: {
+      fontSize: 13,
+      color: colors.textMuted,
+      lineHeight: 18,
+      marginBottom: 14,
+    },
+    modalInput: {
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 12,
+      fontSize: 14,
+      color: colors.text,
+      minHeight: 80,
+      textAlignVertical: 'top',
+      marginBottom: 16,
+    },
+    modalBtnRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 10,
+    },
+    modalCancelBtn: {
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+    },
+    modalCancelText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    modalConfirmBtn: {
+      backgroundColor: colors.primary,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+    },
+    modalConfirmText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: '#FFFFFF',
+    },
+    avatarContainer: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+    },
+    speechBubble: {
+      position: 'absolute',
+      top: 10,
+      zIndex: 10,
+      backgroundColor: isDark ? '#334155' : '#1E293B',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 16,
+      maxWidth: '92%',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.25,
+      shadowRadius: 5,
+      elevation: 6,
+    },
+    speechBubbleText: {
+      color: '#FFFFFF',
+      fontSize: 13,
+      fontWeight: '600',
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    speechBubbleArrow: {
+      position: 'absolute',
+      bottom: -6,
+      alignSelf: 'center',
+      width: 0,
+      height: 0,
+      borderLeftWidth: 6,
+      borderRightWidth: 6,
+      borderTopWidth: 6,
+      borderStyle: 'solid',
+      backgroundColor: 'transparent',
+      borderLeftColor: 'transparent',
+      borderRightColor: 'transparent',
+      borderTopColor: isDark ? '#334155' : '#1E293B',
+    },
+    avatarTouchArea: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    activityCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    activityItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingVertical: 10,
+      gap: 12,
+    },
+    activityIconCircle: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 2,
+    },
+    activityContent: {
+      flex: 1,
+    },
+    activityHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    activityTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    activityDelta: {
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    activityNote: {
+      fontSize: 12,
+      fontStyle: 'italic',
+      color: colors.textMuted,
+      marginTop: 3,
+    },
+    activityDate: {
+      fontSize: 11,
+      color: colors.textMuted,
+      marginTop: 4,
+    },
+    emptyActivityCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 6,
+    },
+    emptyActivityText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+      textAlign: 'center',
+    },
+    emptyActivitySub: {
+      fontSize: 12,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+    editModalContent: {
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      padding: 20,
+      width: '100%',
+      maxWidth: 420,
+      maxHeight: '85%',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    editFieldLabel: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.textMuted,
+      marginTop: 10,
+      marginBottom: 4,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    editInput: {
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      fontSize: 14,
+      color: colors.text,
+    },
+    timeInputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    timeInput: {
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      fontSize: 16,
+      fontWeight: '700',
+      width: 54,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    timeColon: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    timeHelperText: {
+      fontSize: 13,
+      color: colors.textMuted,
+      fontWeight: '500',
+    },
+    editScrollView: {
+      maxHeight: 280,
+    },
+    editScrollContent: {
+      paddingBottom: 16,
+    },
+  });

@@ -11,13 +11,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '../../store/useGoalStore.ts';
 import { Avatar } from '../../components/avatar/Avatar.tsx';
 import { effectiveHealth, healthState } from '../../domain/health.ts';
-import { Colors } from '../../constants/theme.ts';
+import type { ThemeColors } from '../../constants/theme.ts';
 import type { GoalRecord } from '../../db/schema.ts';
 import { useCurrentTime } from '../../hooks/useCurrentTime.ts';
+import { useTheme } from '../../context/ThemeContext.tsx';
 
 type SectionType = 'completed' | 'paused' | 'dead';
 
 export default function HallOfFameScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [section, setSection] = useState<SectionType>('completed');
   const { goals, resumeGoal, payStake } = useGoalStore();
   const now = useCurrentTime();
@@ -71,14 +74,14 @@ export default function HallOfFameScreen() {
           {section === 'completed' && (
             <View>
               <View style={styles.statusBadgeGreenRow}>
-                <Ionicons name="ribbon" size={13} color={Colors.success} style={{ marginRight: 4 }} />
+                <Ionicons name="ribbon" size={13} color={colors.success} style={{ marginRight: 4 }} />
                 <Text style={styles.statusBadgeGreen}>Living their best life!</Text>
               </View>
               <Text style={styles.dateText}>
                 Completed on {new Date(item.completedAt || item.updatedAt).toLocaleDateString()}
               </Text>
               <View style={styles.metaRow}>
-                <Ionicons name="trophy" size={16} color={Colors.warning} />
+                <Ionicons name="trophy" size={16} color={colors.warning} />
                 <Text style={styles.metaText}>Best streak: {item.bestStreak}</Text>
               </View>
             </View>
@@ -87,7 +90,7 @@ export default function HallOfFameScreen() {
           {section === 'paused' && (
             <View>
               <View style={styles.statusBadgeBlueRow}>
-                <Ionicons name="moon" size={13} color={Colors.primary} style={{ marginRight: 4 }} />
+                <Ionicons name="moon" size={13} color={colors.primary} style={{ marginRight: 4 }} />
                 <Text style={styles.statusBadgeBlue}>Taking a nap</Text>
               </View>
               <Text style={styles.dateText}>
@@ -109,7 +112,7 @@ export default function HallOfFameScreen() {
                 <Ionicons
                   name={item.deathCause === 'abandoned' ? 'flag-outline' : 'skull-outline'}
                   size={13}
-                  color={Colors.textMuted}
+                  color={colors.textMuted}
                   style={{ marginRight: 4 }}
                 />
                 <Text style={styles.statusBadgeGray}>
@@ -121,19 +124,40 @@ export default function HallOfFameScreen() {
               </Text>
 
               {item.stake ? (
-                <View style={styles.stakeBox}>
-                  <Text style={styles.stakeLabel}>Stakes Consequence:</Text>
-                  <Text style={styles.stakeText}>{`"${item.stake}"`}</Text>
+                <View style={[styles.stakeBox, { backgroundColor: isDark ? '#450A0A' : '#FEF2F2' }]}>
+                  <Text style={[styles.stakeLabel, { color: isDark ? '#FCA5A5' : '#991B1B' }]}>
+                    Stakes Consequence:
+                  </Text>
+                  <Text style={[styles.stakeText, { color: isDark ? '#FECACA' : '#7F1D1D' }]}>
+                    {`"${item.stake}"`}
+                  </Text>
                   <TouchableOpacity
-                    style={[styles.stakeButton, item.stakePaid ? styles.stakePaid : styles.stakeUnpaid]}
+                    style={[
+                      styles.stakeButton,
+                      item.stakePaid
+                        ? styles.stakePaid
+                        : [
+                            styles.stakeUnpaid,
+                            {
+                              backgroundColor: isDark ? '#7F1D1D' : '#FEE2E2',
+                              borderColor: isDark ? '#991B1B' : '#FCA5A5',
+                            },
+                          ],
+                    ]}
                     onPress={() => handleToggleStake(item.id, Boolean(item.stakePaid), item.stake)}
                   >
                     <Ionicons
                       name={item.stakePaid ? 'checkmark-circle' : 'alert-circle-outline'}
                       size={18}
-                      color={item.stakePaid ? '#FFFFFF' : '#991B1B'}
+                      color={item.stakePaid ? '#FFFFFF' : isDark ? '#FCA5A5' : '#991B1B'}
                     />
-                    <Text style={item.stakePaid ? styles.stakePaidText : styles.stakeUnpaidText}>
+                    <Text
+                      style={
+                        item.stakePaid
+                          ? styles.stakePaidText
+                          : [styles.stakeUnpaidText, { color: isDark ? '#FCA5A5' : '#991B1B' }]
+                      }
+                    >
                       {item.stakePaid ? 'Stake Paid (Honor Restored)' : 'Pay Consequence'}
                     </Text>
                   </TouchableOpacity>
@@ -149,7 +173,7 @@ export default function HallOfFameScreen() {
   return (
     <View style={styles.container}>
       {/* Segmented Control */}
-      <View style={styles.segmentedControl}>
+      <View style={[styles.segmentedControl, { backgroundColor: isDark ? '#1E293B' : '#E2E8F0' }]}>
         <TouchableOpacity
           style={[styles.segmentBtn, section === 'completed' && styles.segmentActive]}
           onPress={() => setSection('completed')}
@@ -157,7 +181,7 @@ export default function HallOfFameScreen() {
           <Ionicons
             name="ribbon"
             size={16}
-            color={section === 'completed' ? Colors.primary : Colors.textMuted}
+            color={section === 'completed' ? colors.primary : colors.textMuted}
             style={{ marginRight: 4 }}
           />
           <Text style={[styles.segmentText, section === 'completed' && styles.segmentTextActive]}>
@@ -171,7 +195,7 @@ export default function HallOfFameScreen() {
           <Ionicons
             name="moon"
             size={15}
-            color={section === 'paused' ? Colors.primary : Colors.textMuted}
+            color={section === 'paused' ? colors.primary : colors.textMuted}
             style={{ marginRight: 4 }}
           />
           <Text style={[styles.segmentText, section === 'paused' && styles.segmentTextActive]}>
@@ -185,7 +209,7 @@ export default function HallOfFameScreen() {
           <Ionicons
             name="skull"
             size={15}
-            color={section === 'dead' ? '#DC2626' : Colors.textMuted}
+            color={section === 'dead' ? colors.danger : colors.textMuted}
             style={{ marginRight: 4 }}
           />
           <Text style={[styles.segmentText, section === 'dead' && styles.segmentTextActive]}>
@@ -203,11 +227,11 @@ export default function HallOfFameScreen() {
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconContainer}>
               {section === 'completed' ? (
-                <Ionicons name="trophy-outline" size={54} color={Colors.warning} />
+                <Ionicons name="trophy-outline" size={54} color={colors.warning} />
               ) : section === 'paused' ? (
-                <Ionicons name="moon-outline" size={54} color={Colors.primary} />
+                <Ionicons name="moon-outline" size={54} color={colors.primary} />
               ) : (
-                <Ionicons name="leaf-outline" size={54} color={Colors.success} />
+                <Ionicons name="leaf-outline" size={54} color={colors.success} />
               )}
             </View>
             <Text style={styles.emptyTitle}>
@@ -231,210 +255,206 @@ export default function HallOfFameScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  segmentedControl: {
-    flexDirection: 'row',
-    backgroundColor: '#E2E8F0',
-    margin: 16,
-    borderRadius: 12,
-    padding: 4,
-  },
-  segmentBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  segmentActive: {
-    backgroundColor: Colors.card,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  segmentText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textMuted,
-  },
-  segmentTextActive: {
-    color: Colors.text,
-    fontWeight: '700',
-  },
-  list: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    marginRight: 14,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  goalTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 6,
-  },
-  statusBadgeGreenRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.successLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  statusBadgeGreen: {
-    color: Colors.success,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  statusBadgeBlueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  statusBadgeBlue: {
-    color: Colors.primary,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  statusBadgeGrayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  statusBadgeGray: {
-    color: Colors.textMuted,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  dateText: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginBottom: 6,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaText: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    fontWeight: '600',
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-    gap: 6,
-    marginTop: 4,
-  },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  stakeBox: {
-    backgroundColor: '#FEF2F2',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 6,
-  },
-  stakeLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#991B1B',
-  },
-  stakeText: {
-    fontSize: 12,
-    color: '#7F1D1D',
-    fontStyle: 'italic',
-    marginVertical: 4,
-  },
-  stakeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    gap: 6,
-    marginTop: 4,
-  },
-  stakeUnpaid: {
-    backgroundColor: '#FEE2E2',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-  },
-  stakePaid: {
-    backgroundColor: Colors.success,
-  },
-  stakeUnpaidText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#991B1B',
-  },
-  stakePaidText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 32,
-  },
-  emptyIconContainer: {
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    segmentedControl: {
+      flexDirection: 'row',
+      margin: 16,
+      borderRadius: 12,
+      padding: 4,
+    },
+    segmentBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      paddingVertical: 10,
+      alignItems: 'center',
+      borderRadius: 8,
+    },
+    segmentActive: {
+      backgroundColor: colors.card,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 2,
+    },
+    segmentText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    segmentTextActive: {
+      color: colors.text,
+      fontWeight: '700',
+    },
+    list: {
+      padding: 16,
+      paddingTop: 0,
+    },
+    card: {
+      flexDirection: 'row',
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+    },
+    avatarContainer: {
+      marginRight: 14,
+    },
+    cardContent: {
+      flex: 1,
+    },
+    goalTitle: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 6,
+    },
+    statusBadgeGreenRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      backgroundColor: colors.successLight,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+      marginBottom: 4,
+    },
+    statusBadgeGreen: {
+      color: colors.success,
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    statusBadgeBlueRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primaryLight,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+      marginBottom: 4,
+    },
+    statusBadgeBlue: {
+      color: colors.primary,
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    statusBadgeGrayRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      backgroundColor: colors.background,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+      marginBottom: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    statusBadgeGray: {
+      color: colors.textMuted,
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    dateText: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginBottom: 6,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    metaText: {
+      fontSize: 12,
+      color: colors.textMuted,
+      fontWeight: '600',
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      alignSelf: 'flex-start',
+      gap: 6,
+      marginTop: 4,
+    },
+    actionButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    stakeBox: {
+      padding: 10,
+      borderRadius: 8,
+      marginTop: 6,
+    },
+    stakeLabel: {
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    stakeText: {
+      fontSize: 12,
+      fontStyle: 'italic',
+      marginVertical: 4,
+    },
+    stakeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      gap: 6,
+      marginTop: 4,
+    },
+    stakeUnpaid: {
+      borderWidth: 1,
+    },
+    stakePaid: {
+      backgroundColor: colors.success,
+    },
+    stakeUnpaidText: {
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    stakePaidText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: '#FFFFFF',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 80,
+      paddingHorizontal: 32,
+    },
+    emptyIconContainer: {
+      marginBottom: 16,
+    },
+    emptyTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 14,
+      color: colors.textMuted,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+  });

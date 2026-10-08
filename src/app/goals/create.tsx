@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '../../store/useGoalStore.ts';
 import { CategoryIcon } from '../../components/CategoryIcon.tsx';
-import { Colors } from '../../constants/theme.ts';
+import { useTheme } from '../../context/ThemeContext.tsx';
+import type { ThemeColors } from '../../constants/theme.ts';
 import type { Category, GoalType, Cadence } from '../../domain/types.ts';
 
 const CATEGORIES: { id: Category; label: string; desc: string }[] = [
@@ -37,6 +38,8 @@ const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function CreateGoalScreen() {
   const { createGoal } = useGoalStore();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const scrollViewRef = useRef<ScrollView>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const focusedInputRef = useRef<string | null>(null);
@@ -171,12 +174,14 @@ export default function CreateGoalScreen() {
         <TextInput
           style={styles.input}
           placeholder="e.g. Work out 3x a week, Save $1,000"
+          placeholderTextColor={colors.textMuted}
           value={title}
           onChangeText={setTitle}
         />
         <TextInput
           style={[styles.input, styles.inputWhy]}
           placeholder="Why does this matter to you? (optional reminder)"
+          placeholderTextColor={colors.textMuted}
           value={why}
           onChangeText={setWhy}
           multiline
@@ -197,7 +202,7 @@ export default function CreateGoalScreen() {
                 <CategoryIcon
                   category={cat.id}
                   size={26}
-                  color={category === cat.id ? Colors.primary : undefined}
+                  color={category === cat.id ? colors.primary : undefined}
                 />
               </View>
               <Text style={[styles.categoryCardLabel, category === cat.id && styles.categoryCardLabelSelected]}>
@@ -238,6 +243,8 @@ export default function CreateGoalScreen() {
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
+                placeholder="Target value"
+                placeholderTextColor={colors.textMuted}
                 value={targetValue}
                 onChangeText={setTargetValue}
                 onFocus={() => scrollToY(180, 'target')}
@@ -251,6 +258,7 @@ export default function CreateGoalScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="times, $, km"
+                placeholderTextColor={colors.textMuted}
                 value={unit}
                 onChangeText={setUnit}
                 onFocus={() => scrollToY(180, 'target')}
@@ -278,6 +286,7 @@ export default function CreateGoalScreen() {
               <TextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
                 placeholder="Add another step..."
+                placeholderTextColor={colors.textMuted}
                 value={newMilestone}
                 onChangeText={setNewMilestone}
                 onFocus={() => scrollToY(280, 'milestone')}
@@ -335,6 +344,8 @@ export default function CreateGoalScreen() {
             <TextInput
               style={styles.input}
               keyboardType="numeric"
+              placeholder="1"
+              placeholderTextColor={colors.textMuted}
               value={String(cadenceDay || 1)}
               onChangeText={(txt) => setCadenceDay(parseInt(txt, 10) || 1)}
             />
@@ -346,6 +357,7 @@ export default function CreateGoalScreen() {
           <TextInput
             style={[styles.input, styles.timeInput]}
             placeholder="18"
+            placeholderTextColor={colors.textMuted}
             keyboardType="numeric"
             maxLength={2}
             value={reminderHour}
@@ -359,6 +371,7 @@ export default function CreateGoalScreen() {
           <TextInput
             style={[styles.input, styles.timeInput]}
             placeholder="00"
+            placeholderTextColor={colors.textMuted}
             keyboardType="numeric"
             maxLength={2}
             value={reminderMinute}
@@ -379,13 +392,13 @@ export default function CreateGoalScreen() {
           style={styles.input} 
           onPress={() => setShowDatePicker(true)}
         >
-          <Text style={{ color: targetDate ? Colors.text : Colors.textMuted }}>
+          <Text style={{ color: targetDate ? colors.text : colors.textMuted }}>
             {targetDate ? targetDate.toLocaleDateString() : 'No deadline (Indefinite)'}
           </Text>
         </TouchableOpacity>
         {targetDate && (
           <TouchableOpacity onPress={() => setTargetDate(undefined)}>
-            <Text style={{ color: Colors.danger, fontSize: 13, marginTop: 4 }}>Clear Deadline</Text>
+            <Text style={{ color: colors.danger, fontSize: 13, marginTop: 4 }}>Clear Deadline</Text>
           </TouchableOpacity>
         )}
         
@@ -417,6 +430,7 @@ export default function CreateGoalScreen() {
         <TextInput
           style={styles.input}
           placeholder="e.g. Donate $25 to charity, No dessert for 2 weeks"
+          placeholderTextColor={colors.textMuted}
           value={stake}
           onChangeText={setStake}
           onFocus={handleScrollToEnd}
@@ -442,257 +456,259 @@ export default function CreateGoalScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 70,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.textMuted,
-    marginBottom: 8,
-    letterSpacing: 0.5,
-  },
-  sectionDesc: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginBottom: 8,
-    lineHeight: 18,
-  },
-  subLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: Colors.text,
-    marginBottom: 10,
-  },
-  inputWhy: {
-    minHeight: 65,
-    textAlignVertical: 'top',
-  },
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  categoryCard: {
-    flexBasis: '31%',
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  categoryCardSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
-  },
-  categoryCardIcon: {
-    height: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  categoryCardLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  categoryCardLabelSelected: {
-    color: Colors.primary,
-    fontWeight: '700',
-  },
-  typeList: {
-    gap: 8,
-    marginBottom: 12,
-  },
-  typeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 12,
-    gap: 12,
-  },
-  typeCardSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
-  },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.primary,
-  },
-  typeTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  typeTitleSelected: {
-    color: Colors.primary,
-    fontWeight: '700',
-  },
-  typeDesc: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: 2,
-  },
-  rowInputs: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  milestonesSection: {
-    marginTop: 8,
-  },
-  milestoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 8,
-  },
-  milestoneNumber: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.textMuted,
-  },
-  milestoneText: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.text,
-  },
-  addMilestoneRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 4,
-  },
-  addBtn: {
-    backgroundColor: Colors.primary,
-    width: 46,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cadenceRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  cadenceBtn: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  cadenceBtnSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primary,
-  },
-  cadenceText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  cadenceTextSelected: {
-    color: '#FFFFFF',
-  },
-  weekdayPicker: {
-    marginTop: 12,
-  },
-  weekdayRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dayBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  dayBtnSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  dayText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  dayTextSelected: {
-    color: '#FFFFFF',
-  },
-  timeInputsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  timeInput: {
-    width: 60,
-    textAlign: 'center',
-    marginBottom: 0,
-    fontWeight: '700',
-  },
-  timeColon: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  submitButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 8,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 70,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionLabel: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.textMuted,
+      marginBottom: 8,
+      letterSpacing: 0.5,
+    },
+    sectionDesc: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginBottom: 8,
+      lineHeight: 18,
+    },
+    subLabel: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: 6,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: colors.text,
+      marginBottom: 10,
+    },
+    inputWhy: {
+      minHeight: 65,
+      textAlignVertical: 'top',
+    },
+    categoryGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    categoryCard: {
+      flexBasis: '31%',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    categoryCardSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryLight,
+    },
+    categoryCardIcon: {
+      height: 30,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 4,
+    },
+    categoryCardLabel: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    categoryCardLabelSelected: {
+      color: colors.primary,
+      fontWeight: '700',
+    },
+    typeList: {
+      gap: 8,
+      marginBottom: 12,
+    },
+    typeCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 12,
+      gap: 12,
+    },
+    typeCardSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryLight,
+    },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    radioDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.primary,
+    },
+    typeTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    typeTitleSelected: {
+      color: colors.primary,
+      fontWeight: '700',
+    },
+    typeDesc: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    rowInputs: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    milestonesSection: {
+      marginTop: 8,
+    },
+    milestoneRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      padding: 10,
+      borderRadius: 8,
+      marginBottom: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 8,
+    },
+    milestoneNumber: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.textMuted,
+    },
+    milestoneText: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text,
+    },
+    addMilestoneRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 4,
+    },
+    addBtn: {
+      backgroundColor: colors.primary,
+      width: 46,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cadenceRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    cadenceBtn: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 12,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    cadenceBtnSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary,
+    },
+    cadenceText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    cadenceTextSelected: {
+      color: '#FFFFFF',
+    },
+    weekdayPicker: {
+      marginTop: 12,
+    },
+    weekdayRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    dayBtn: {
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    dayBtnSelected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    dayText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    dayTextSelected: {
+      color: '#FFFFFF',
+    },
+    timeInputsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    timeInput: {
+      width: 60,
+      textAlign: 'center',
+      marginBottom: 0,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    timeColon: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    submitButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      backgroundColor: colors.primary,
+      paddingVertical: 16,
+      borderRadius: 16,
+      alignItems: 'center',
+      marginTop: 8,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    submitButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '700',
+    },
+  });
