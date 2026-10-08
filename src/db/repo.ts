@@ -495,6 +495,30 @@ export const GoalRepo = {
       .where(eq(schema.goals.id, goalId));
   },
 
+  async update(
+    goalId: string,
+    data: {
+      title?: string;
+      why?: string;
+      reminderMinutes?: number;
+      targetValue?: number;
+      unit?: string;
+      targetDate?: number;
+      stake?: string;
+    },
+  ) {
+    const db = getDb();
+    const now = Date.now();
+    await db
+      .update(schema.goals)
+      .set({
+        ...data,
+        updatedAt: now,
+      })
+      .where(eq(schema.goals.id, goalId));
+    return this.getById(goalId);
+  },
+
   async delete(goalId: string) {
     const db = getDb();
     await db.delete(schema.goals).where(eq(schema.goals.id, goalId));

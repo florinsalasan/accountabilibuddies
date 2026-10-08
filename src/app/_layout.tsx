@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AppState, type AppStateStatus } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { initDatabase } from '../db/init.ts';
 import { setupNotificationChannels, requestNotificationPermissions } from '../services/notifications.ts';
 import { useGoalStore } from '../store/useGoalStore.ts';
@@ -26,8 +27,27 @@ export default function RootLayout() {
       }
     });
 
+    // 5. Deep-link on notification tap while running
+    const notifSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const goalId = response.notification.request.content.data?.goalId;
+      if (goalId && typeof goalId === 'string' && goalId !== 'test') {
+        router.push(`/goals/${goalId}`);
+      }
+    });
+
+    // 6. Handle cold launch from notification tap
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        const goalId = response.notification.request.content.data?.goalId;
+        if (goalId && typeof goalId === 'string' && goalId !== 'test') {
+          router.push(`/goals/${goalId}`);
+        }
+      }
+    });
+
     return () => {
       sub.remove();
+      notifSub.remove();
     };
   }, []);
 
