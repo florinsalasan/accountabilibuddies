@@ -339,29 +339,32 @@ export default function GoalDetailScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Big Interactive Avatar Header */}
       <View style={styles.avatarHeader}>
-        {speechBubble ? (
+        <View style={styles.avatarContainer}>
           <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => setSpeechBubble(null)}
-            style={styles.speechBubble}
+            activeOpacity={0.85}
+            onPress={handleAvatarTap}
+            style={styles.avatarTouchArea}
           >
-            <Text style={styles.speechBubbleText}>{speechBubble}</Text>
-            <View style={styles.speechBubbleArrow} />
+            <Avatar
+              category={goal.category}
+              healthState={hState}
+              lifeState={goal.lifeState}
+              size={210}
+            />
           </TouchableOpacity>
-        ) : null}
 
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={handleAvatarTap}
-          style={styles.avatarTouchArea}
-        >
-          <Avatar
-            category={goal.category}
-            healthState={hState}
-            lifeState={goal.lifeState}
-            size={210}
-          />
-        </TouchableOpacity>
+          {speechBubble ? (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setSpeechBubble(null)}
+              style={styles.speechBubble}
+            >
+              <Text style={styles.speechBubbleText}>{speechBubble}</Text>
+              <View style={styles.speechBubbleArrow} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
         <Text style={styles.goalTitle}>{goal.title}</Text>
         {goal.why ? <Text style={styles.goalWhy}>{`"${goal.why}"`}</Text> : null}
 
@@ -1416,20 +1419,27 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
+  avatarContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
   speechBubble: {
+    position: 'absolute',
+    top: 10,
+    zIndex: 10,
     backgroundColor: '#1E293B',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 16,
-    marginBottom: 10,
-    maxWidth: '90%',
+    maxWidth: '92%',
     alignItems: 'center',
-    position: 'relative',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 6,
   },
   speechBubbleText: {
     color: '#FFFFFF',
